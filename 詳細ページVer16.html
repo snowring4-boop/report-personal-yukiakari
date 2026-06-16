@@ -1,0 +1,3095 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f2d67">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARG_Database</title>
+
+<style>
+:root{
+    /* icon */
+
+    --icon-size-s:12px;
+
+    --icon-size-m:14px;
+
+    --icon-size-l:16px;
+
+    /* radius */
+
+    --radius-pill:999px;
+
+    --grid-columns:
+        50px
+        60px
+        minmax(140px, 2fr)
+        minmax(260px, 3fr)
+        minmax(260px, 3fr)
+        60px;
+    
+    --ui-color-primary: #0f2d67;
+    --ui-color-primary-hover: #1b468f;
+
+    --ui-color-border: #d1d5db;
+    --ui-color-border-focus: #0f2d67;
+
+    --ui-color-bg: #ffffff;
+    --ui-color-text: #222;
+
+    --ui-radius: 6px;
+
+    --ui-transition:
+        border-color .2s ease,
+        color .2s ease,
+        background-color .2s ease,
+        box-shadow .2s ease;  
+}
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:#eef2f5;
+    margin:16px;
+    padding-bottom:80px;
+    color:#222;
+}
+.case-header{background:#fff;padding:18px 20px;border-radius:12px;margin-bottom:14px;border:1px solid #dfe5ec;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+input,button{padding:7px 10px;font-size:14px}
+table{width:100%;border-collapse:collapse;background:#fff;table-layout:fixed}
+td{overflow-wrap:anywhere}
+th,td{
+    border:1px solid #d9dee7;
+    padding:4px 8px;
+    vertical-align:top;
+    font-size:14px;
+}
+th{background:#0f2d67;color:#fff;height:42px;font-size:14px}
+.rowhandle{
+    position:relative;
+    cursor:grab;
+    user-select:none;
+}
+
+.rowhandle::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:18px;
+    height:18px;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:18px 18px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M5 7h14'/%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M5 17h14'/%3E%3C/svg%3E");
+}
+.tagText{
+
+    flex:1;
+
+    padding-right:6px;
+
+    line-height:1.5;
+
+}
+.dropzone{
+    min-height:28px;
+
+    padding:2px;
+
+    border:2px dashed transparent;
+
+    overflow:visible;
+}
+
+.dragging{opacity:.45}
+
+.drag-over{
+    border-top:none !important;
+    background:transparent !important;
+}
+
+.gridRow.drop-target > .gridCell{
+
+    border-top:4px solid #2f6fed !important;
+
+}
+
+/* ==========================================
+   Ver15 Drag Indicator
+========================================== */
+
+.progressPanel{
+    background:#fff;
+    border:1px solid #d9dee7;
+    border-radius:10px;
+    padding:14px 18px;
+    margin-top:10px;
+    display:flex;
+    gap:24px;
+    align-items:stretch;
+    width:100%;
+    max-width:900px;
+}
+
+.targetBox{
+    flex:0 0 240px;
+    border-right:1px solid #d9dee7;
+    padding-right:18px;
+}
+
+.targetLabel,
+.progressLabel{
+    font-size:13px;
+    font-weight:700;
+    color:#0f2d67;
+  }
+
+.targetInput{
+    width:120px;
+    max-width:120px;
+    height:42px;
+    font-size:24px;
+    font-weight:700;
+    color:#0f2d67;
+    text-align:center;
+    border:1px solid #d1d5db;
+    border-radius:6px;
+}
+
+.progressBox{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    max-width:600px;
+}
+.progressTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.progressText{font-size:18px;font-weight:700;color:#0f2d67}
+.progressBar{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.progressFill{height:100%;width:0%;background:#1e3a5f;transition:.3s}
+.targetNote{font-size:11px;color:#666;margin-top:6px}
+.progressNote{font-size:11px;color:#666;margin-top:6px}
+.caseMemoCard{
+    margin-top:18px;
+    background:#fff;
+    border:1px solid #d9dee7;
+    border-radius:10px;
+    padding:14px 18px;
+    max-width:900px;
+}
+
+.caseMemoTitle{
+    font-size:16px;
+    font-weight:700;
+    color:#0f2d67;
+    margin-bottom:10px;
+}
+
+.caseMemoInput{
+
+    width:100%;
+    min-height:90px;
+    padding:10px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    resize:vertical;
+    font-family:inherit;
+    font-size:14px;
+    line-height:1.6;
+    box-sizing:border-box;
+}
+
+table input{font-size:13px;padding:5px 8px}
+#caseTitle{
+    height:32px;
+    font-size:14px;
+    max-width:300px;
+}
+.toolbar button{min-width:120px;height:40px}
+.progressText{font-size:18px!important}
+.targetInput{height:38px!important;font-size:22px!important}
+.progressBar{height:10px!important}
+tr{
+    height:44px;
+}
+
+
+.status-investigating{
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    min-width:120px;
+    height:36px;
+
+    padding:0 16px;
+
+    border:1px solid #f59e0b;
+    border-radius:999px;
+
+    background:#fffaf0;
+    color:#d97706;
+
+    font-size:13px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:
+     color .2s ease,
+     transform .08s ease;
+}
+
+.status-investigating:hover{
+
+    background:#fef3c7;
+
+}
+
+.status-investigating:active{
+
+    transform:scale(.98);
+
+}
+
+.status-complete{
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    min-width:120px;
+    height:36px;
+
+    padding:0 16px;
+
+    border:1px solid #16a34a;
+    border-radius:999px;
+
+    background:#f0fdf4;
+    color:#15803d;
+
+    font-size:13px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        transform .08s ease;
+}
+
+.status-complete:hover{
+
+    background:#dcfce7;
+
+}
+
+.status-complete:active{
+
+    transform:scale(.98);
+
+}
+
+.case-header h2{
+font-size:22px;
+font-weight:800;
+letter-spacing:.5px;
+margin-bottom:12px;
+}
+#search{
+padding-left:34px;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344l3.387 3.387-1.398 1.398-3.387-3.387a6 6 0 111.398-1.398zM6.5 11A4.5 4.5 0 106.5 2a4.5 4.5 0 000 9z'/%3E%3C/svg%3E");
+background-repeat:no-repeat;
+background-position:10px center;
+}
+
+th:nth-child(2),td:nth-child(2){width:70px;text-align:center}
+th:last-child,td:last-child{width:80px;text-align:center}
+
+.tag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin:3px !important;
+    padding:3px 8px !important;
+    background:#f8fafc !important;
+    border:1px solid #dbe3ec;
+    border-radius:8px !important;
+    font-size:13px;
+    line-height:1.3;
+    max-width:100%;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    user-select:none;
+    transition:
+      background-color .15s ease,
+      border-color .15s ease,
+      transform .12s ease,
+      opacity .15s ease,
+      box-shadow .15s ease;
+
+}
+
+th:nth-child(1),td:nth-child(1){width:50px}
+th:nth-child(2),td:nth-child(2){width:70px}
+th:nth-child(3),
+td:nth-child(3){
+    width:22%;
+}
+th:nth-child(4){width:35%;text-align:center}
+td:nth-child(4){width:35%}
+th:nth-child(5){width:35%;text-align:center}
+td:nth-child(5){width:35%}
+th:nth-child(6),td:nth-child(6){width:70px}
+
+.tag button{
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    width:18px;
+    height:18px;
+
+    padding:0;
+    margin:0;
+
+    border:none;
+    border-radius:50%;
+
+    background:transparent;
+
+    box-shadow:none;
+    outline:none;
+
+    cursor:pointer;
+
+    font-size:11px;
+    line-height:1;
+
+    color:#94a3b8;
+
+    opacity:0;
+
+    transition:
+        opacity .15s ease,
+        color .15s ease,
+        background-color .15s ease;
+
+}
+
+.tag:hover{
+
+    background:#f3f7fd !important;
+    border-color:#c9d8ee;
+
+}
+
+.tagText[contenteditable="true"]{
+ background:#fff;
+ border:1px solid #2f6fed;
+ border-radius:4px;
+ padding:2px 4px;
+ outline:none;
+}
+
+.empty-title{
+ background:#fecdd3 !important;
+}
+.empty-title:empty::before{
+ content:'タイトル未入力';
+ color:#d97777;
+}
+
+.copyToast{
+
+    position:fixed;
+
+    left:50%;
+    bottom:24px;
+
+    transform:translateX(-50%);
+
+    padding:10px 18px;
+
+    border-radius:8px;
+
+    background:#323232;
+
+    color:#ffffff;
+
+    font-size:13px;
+    font-weight:500;
+
+    white-space:nowrap;
+
+    z-index:9999;
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,.18);
+
+    animation:
+        toastFadeIn .15s ease;
+
+}
+
+@keyframes toastFadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateX(-50%)
+            translateY(8px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateX(-50%)
+            translateY(0);
+
+    }
+
+}
+
+.backLink:hover{
+
+    color:#0f2d67;
+
+    text-decoration:none;
+
+}
+
+.inputGroup{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+}
+
+.inputLabel{
+    font-size:12px;
+    font-weight:600;
+    color:#0f2d67;
+    padding-left:2px;
+}
+
+.modernInput{
+
+    width:100%;
+    box-sizing:border-box;
+
+    padding:6px 2px;
+
+    font-size:13px;
+    font-family:inherit;
+
+    color:var(--ui-color-text);
+
+    background:transparent;
+
+    border:none;
+    border-bottom:2px solid var(--ui-color-border);
+
+    border-radius:0;
+
+    outline:none;
+
+    transition:
+        border-color .2s ease;
+}
+
+.caseTitleInput{
+
+    padding:
+        10px 12px
+        8px 12px;
+
+    background:#f8fafc;
+
+    border-radius:
+        8px 8px 0 0;
+
+    border-bottom-width:2px;
+
+    transition:
+        background-color .2s ease,
+        border-color .2s ease;
+
+}
+
+.caseTitleInput:focus{
+
+    background:#f8fafc;
+
+    border-bottom-color:
+        var(--ui-color-primary);
+
+}
+
+.tagInput{
+    height:28px;
+    padding:4px 2px;
+    font-size:13px;
+    box-sizing:border-box;
+    background:#f8fafc;
+}
+
+.modernInput:focus{
+
+    border-bottom-color:
+        var(--ui-color-primary);
+
+}
+
+.primaryButton{
+
+    min-width:64px;
+    height:32px;
+
+    padding:0 14px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    border:none;
+    border-radius:8px;
+
+    background:var(--ui-color-primary);
+    color:#fff;
+
+    font-size:13px;
+    font-weight:600;
+    font-family:inherit;
+
+    cursor:pointer;
+    user-select:none;
+
+    transition:
+        background-color .18s ease,
+        transform .08s ease,
+        opacity .18s ease;
+}
+
+.secondaryButton{
+
+    min-width:64px;
+    height:32px;
+
+    padding:0 14px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid var(--ui-color-border);
+
+    border-radius:8px;
+
+    background:#fff;
+    color:var(--ui-color-primary);
+
+    font-size:13px;
+    font-weight:600;
+    font-family:inherit;
+
+    cursor:pointer;
+    user-select:none;
+
+    transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        transform .08s ease;
+}
+
+
+
+.secondaryButton:hover{
+
+    background:#f8fafc;
+
+    border-color:var(--ui-color-primary);
+
+}
+
+.secondaryButton:active{
+
+    transform:scale(.98);
+
+}
+
+.primaryButton:hover{
+
+    background:var(--ui-color-primary-hover);
+
+}
+
+.primaryButton:active{
+
+    transform:scale(0.98);
+
+}
+
+.primaryButton:disabled{
+
+    opacity:.55;
+    cursor:default;
+
+}
+
+/* ==========================================
+   Ver14 Phase2 Grid Header
+========================================== */
+
+#gridHeader{
+
+    display:grid;
+
+    grid-template-columns:var(--grid-columns);
+
+    align-items:stretch;
+
+    margin-bottom:0;
+
+}
+
+.gridHeaderCell{
+
+    background:#0f2d67;
+
+    color:#fff;
+
+    border:1px solid #d9dee7;
+
+    height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    box-sizing:border-box;
+
+}
+
+.gridRow{
+
+    display:grid;
+
+    grid-template-columns:var(--grid-columns);
+
+    align-items:stretch;
+
+}
+
+.gridCell{
+    border:1px solid #d9dee7;
+    background:#fff;
+    box-sizing:border-box;
+
+    padding:4px 8px;
+
+    font-size:14px;
+    line-height:1.4;
+
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    height:100%;
+}
+
+.gridCell.tagCell{
+    display:flex;
+    flex-direction:column;
+}
+
+.gridCell.tagCell .tagArea{
+    display:flex;
+    flex-direction:column;
+    height:100%;
+}
+
+.gridCell.tagCell .tagList{
+    min-height:28px;
+}
+
+.gridCell.tagCell .tagInputArea{
+    margin-top:auto;
+    flex-shrink:0;
+}
+
+.gridRow > .gridCell:nth-child(2){
+    justify-content:center;
+    text-align:center;
+}
+.gridRow > .gridCell:nth-child(3){
+    padding-left:10px;
+    padding-right:10px;
+}
+.gridRow > .gridCell:last-child{
+    justify-content:center;
+    align-items:center;
+}
+
+.gridRow.drag-over{
+
+    background:#eef4ff;
+
+    outline:3px solid #2f6fed;
+
+    outline-offset:-3px;
+
+}
+
+.titleCell{
+    white-space:pre-wrap;
+}
+
+/* ==========================================
+   Drag Handle State
+========================================== */
+
+.rowhandle.dragging{
+
+    cursor: grabbing;
+
+    opacity: 0.7;
+
+}
+
+.tag.dragging{
+    opacity:.88;
+    transform:
+        translateY(-1px)
+        scale(1.02);
+    box-shadow:
+        0 3px 10px rgba(0,0,0,.10);
+    border-color:#b8cceb;
+    background:#f8fbff !important;
+    z-index:10;
+}
+
+.tagList.drag-target{
+    background:#eef4ff;
+    border-radius:8px;
+    transition:
+        background-color .12s ease;
+}
+
+.tagInputArea{
+    display:flex;
+    align-items:flex-end;
+    gap:0;
+    width:100%;
+    margin-top:6px;
+}
+
+.tagInputArea .inputGroup{
+    flex:0 0 180px;
+    min-width:180px;
+    margin-right:8px;
+}
+
+.tagInputArea .modernInput{
+    width:100%;
+    margin:0;
+    padding-right:4px;
+}
+
+.tagInputArea .addTagButton{
+    flex:0 0 32px;
+    margin:0;
+}
+
+.tagInputArea:focus-within .addTagButton{
+    color:var(--ui-color-primary);
+}
+
+.tagInputArea:hover .addTagButton{
+    color:var(--ui-color-primary);
+}
+
+/* ==========================================
+   SVG Buttons
+========================================== */
+/* ---------- Navigation ---------- */
+
+.backLink{
+    position:relative;
+    border:none;
+    background:transparent;
+    box-shadow:none;
+    padding:0 0 0 22px;
+    margin:0 0 12px 0;
+    color:#555;
+    font-size:14px;
+    cursor:pointer;
+}
+
+.backLink::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:50%;
+    transform:translateY(-50%);
+    width:16px;
+    height:16px;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:16px 16px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E");
+}
+
+/* ---------- Toolbar ---------- */
+
+.addPageButton{
+    position:relative;
+    padding-left:36px;
+}
+
+.addPageButton::before{
+    content:"";
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    width:14px;
+    height:14px;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:14px 14px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14'/%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E");
+}
+
+.exportButton{
+    position:relative;
+    padding-left:38px;
+}
+
+.exportButton::before{
+    content:"";
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    width:16px;
+    height:16px;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:16px 16px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2d67' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v12'/%3E%3Cpolyline points='7 10 12 15 17 10'/%3E%3Cpath d='M5 21h14'/%3E%3C/svg%3E");
+}
+
+.importButton{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    padding-left:38px;
+}
+
+.importButton::before{
+    content:"";
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    width:16px;
+    height:16px;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:16px 16px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2d67' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21V9'/%3E%3Cpolyline points='7 14 12 9 17 14'/%3E%3Cpath d='M5 3h14'/%3E%3C/svg%3E");
+}
+
+/* ---------- Grid ---------- */
+
+.deletePageButton{
+    width:28px;
+    height:28px;
+    padding:0;
+    border:none;
+    border-radius:6px;
+    background-color:transparent;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:16px 16px;
+    cursor:pointer;
+    transition:
+        background-color .18s ease,
+        transform .08s ease;
+
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='3 6 5 6 21 6'/%3E%3Cpath d='M19 6l-1 14H6L5 6'/%3E%3Cpath d='M10 11v6'/%3E%3Cpath d='M14 11v6'/%3E%3Cpath d='M9 6V4h6v2'/%3E%3C/svg%3E");
+}
+
+.deletePageButton:hover{
+    background-color:#fef2f2;
+    transform:scale(1.05);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='3 6 5 6 21 6'/%3E%3Cpath d='M19 6l-1 14H6L5 6'/%3E%3Cpath d='M10 11v6'/%3E%3Cpath d='M14 11v6'/%3E%3Cpath d='M9 6V4h6v2'/%3E%3C/svg%3E");
+}
+
+/* ---------- Tag : Copy ---------- */
+
+.copyTagButton{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:18px;
+    height:18px;
+    padding:0;
+    margin:0;
+    border:none;
+    border-radius:50%;
+    background:transparent;
+    box-shadow:none;
+    outline:none;
+    cursor:pointer;
+    opacity:0;
+    transition:
+        opacity .15s ease,
+        background-color .15s ease,
+        transform .08s ease;
+}
+
+.copyTagButton::before{
+    content:"";
+    display:block;
+    width:14px;
+    height:14px;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:14px 14px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='10' height='10' rx='2'/%3E%3Cpath d='M7 15V7a2 2 0 0 1 2-2h8'/%3E%3C/svg%3E");
+}
+
+.copyTagButton:hover{
+    background:#eef4ff;
+}
+
+.copyTagButton:hover::before{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2d67' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='10' height='10' rx='2'/%3E%3Cpath d='M7 15V7a2 2 0 0 1 2-2h8'/%3E%3C/svg%3E");
+}
+
+.tag:hover .copyTagButton{
+    opacity:1;
+}
+
+/* ---------- Tag : Remove ---------- */
+
+.removeTagButton{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:18px;
+    height:18px;
+    padding:0;
+    margin:0;
+    border:none;
+    border-radius:50%;
+    background:transparent;
+    box-shadow:none;
+    outline:none;
+    cursor:pointer;
+    opacity:0;
+    transition:
+        opacity .15s ease,
+        background-color .15s ease;
+}
+
+.removeTagButton::before{
+    content:"";
+    display:block;
+    width:12px;
+    height:12px;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:12px 12px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12'/%3E%3Cpath d='M18 6L6 18'/%3E%3C/svg%3E");
+}
+
+.removeTagButton:hover{
+    background:#fef2f2;
+}
+
+.removeTagButton:hover::before{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12'/%3E%3Cpath d='M18 6L6 18'/%3E%3C/svg%3E");
+}
+
+.tag:hover .removeTagButton{
+    opacity:1;
+}
+
+/* ---------- Tag : Add ---------- */
+
+.addTagButton{
+    position:relative;
+    flex:0 0 32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0;
+    padding:0;
+    border:none;
+    border-radius:6px;
+    background:transparent;
+    cursor:pointer;
+    user-select:none;
+    transition:
+        background-color .18s ease,
+        transform .08s ease;
+}
+
+.addTagButton::before{
+    content:"";
+    display:block;
+    width:14px;
+    height:14px;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:14px 14px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M12 5v14'/%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E");
+}
+
+.addTagButton:hover{
+    background:#eef4ff;
+}
+
+.addTagButton:hover::before{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f2d67' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M12 5v14'/%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E");
+}
+
+.addTagButton:active{
+    transform:scale(.94);
+}
+
+</style>
+</head>
+<body>
+
+<!-- ===================================================== -->
+<!-- Navigation Area -->
+<!-- ===================================================== -->
+
+<header id="navigation-area">
+
+    <button class="backLink"
+        onclick="location.href='index.html'">
+        調査一覧へ戻る
+     </button>
+
+</header>
+
+
+<!-- ===================================================== -->
+<!-- Case File -->
+<!-- ===================================================== -->
+
+<section id="case-file">
+
+    <div class="case-header">
+
+        <!-- ========================= -->
+        <!-- Case Header -->
+        <!-- ========================= -->
+
+        <section class="case-title-area">
+
+            <h2>CASE FILE</h2>
+
+            案件名:
+            <input
+                id="caseTitle"
+                class="modernInput caseTitleInput"
+                style="width:300px;margin-right:16px;">
+            <button id="statusBtn"></button>
+
+        </section>
+
+
+        <!-- ========================= -->
+        <!-- Progress -->
+        <!-- ========================= -->
+
+        <section class="progressPanel">
+
+            <div class="targetBox">
+
+                <div class="targetLabel">
+                    TARGET #
+                </div>
+
+                <input
+                    id="targetPages"
+                    class="targetInput"
+                    type="number"
+                    min="0">
+
+                <div class="targetNote">
+                    ※ 目標ページ数を入力
+                </div>
+
+            </div>
+
+
+            <div class="progressBox">
+
+                <div class="progressTop">
+
+                    <div class="progressLabel">
+                        PROGRESS
+                    </div>
+
+                    <div
+                        id="progressText"
+                        class="progressText">
+                        未設定
+                    </div>
+
+                </div>
+
+                <div class="progressBar">
+
+                    <div
+                        id="progressFill"
+                        class="progressFill">
+                    </div>
+
+                </div>
+
+                <div class="progressNote">
+                    ※ 現在のページ数 / 目標ページ数
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========================= -->
+        <!-- Case Memo -->
+        <!-- ========================= -->
+
+        <section class="caseMemoCard">
+
+            <div class="caseMemoTitle">
+                案件メモ
+            </div>
+
+            <textarea
+                id="headerMemo"
+                class="caseMemoInput"
+                placeholder="仮説・TODO・気付きなどを記入">
+            </textarea>
+
+        </section>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- Toolbar Area -->
+<!-- ===================================================== -->
+
+<section id="toolbar-area">
+
+    <div class="toolbar">
+
+        <button
+          class="primaryButton addPageButton"
+          onclick="addPage()">
+            新規ページ
+        </button>
+
+        <input
+            id="search"
+            placeholder="検索..."
+            oninput="render()">
+
+        <button
+          class="secondaryButton exportButton"
+          onclick="exportCase()">
+           JSON出力
+        </button>
+
+        <label class="secondaryButton importButton">
+
+          JSON読込
+
+            <input
+              type="file"
+              hidden
+              onchange="importCase(event)">
+
+        </label>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- Table Area -->
+<!-- ===================================================== -->
+
+<main id="table-container">
+
+    <div id="gridHeader"></div>
+
+    <div id="tableArea"></div>
+
+</main>
+
+
+<!-- ===================================================== -->
+<!-- Toast Layer
+<!-- （copyToast は JavaScript が生成）
+<!-- ===================================================== -->
+
+<div id="toast-container"></div>
+
+<script>
+let cases=JSON.parse(localStorage.getItem('arg_cases')||'[]');
+const currentId=localStorage.getItem('currentCaseId');
+let current=cases.find(x=>x.id===currentId);
+
+if(!current){
+ alert('案件が見つかりません');
+ location.href='ホーム画面_ver16.html';
+}
+
+let db=current.data;
+if(!db.pages) db.pages=[];
+
+/* =====================================================
+   Row Drag State (Ver15 Phase1)
+===================================================== */
+
+const dragState = {
+
+    active: false,
+
+    sourceIndex: null,
+
+    targetIndex: null,
+
+    insertBefore: true,
+
+    pointerX: 0,
+
+    pointerY: 0,
+
+    startPointerX: 0,
+
+    startPointerY: 0,
+
+    moved: false,
+
+    handleElement: null
+
+};
+
+/* =====================================================
+   Tag Drag State (Ver15.3 Phase1)
+===================================================== */
+
+const tagDragState = {
+
+    active: false,
+
+    sourcePage: null,
+
+    sourceType: null,
+
+    sourceIndex: null,
+
+    targetPage: null,
+
+    targetType: null,
+
+    targetIndex: null,
+
+    pointerX: 0,
+
+    pointerY: 0,
+
+    startPointerX: 0,
+
+    startPointerY: 0,
+
+    moved: false,
+
+    handleElement: null
+
+};
+
+/* =====================================================
+   Drag Threshold
+===================================================== */
+
+const DRAG_THRESHOLD = 5;
+
+const GRID_COLUMNS = [
+    "",
+    "No",
+    "タイトル",
+    "キーワード",
+    "メモ",
+    "削除"
+];
+
+/* =====================================================
+   Auto Scroll
+===================================================== */
+
+const AUTO_SCROLL_MARGIN = 120;
+
+const AUTO_SCROLL_SPEED = 4;
+
+/* =====================================================
+   Drag Manager (Ver15 Phase1)
+===================================================== */
+
+const DragManager = {
+
+    start(event, sourceIndex) {
+
+    if (event.button !== 0) {
+        return;
+    }
+
+    dragState.active = true;
+
+    dragState.sourceIndex = sourceIndex;
+
+    dragState.targetIndex = sourceIndex;
+
+    dragState.insertBefore = true;
+
+    dragState.pointerX = event.clientX;
+    dragState.pointerY = event.clientY;
+
+    dragState.startPointerX = event.clientX;
+    dragState.startPointerY = event.clientY;
+
+    dragState.moved = false;
+
+    dragState.handleElement = event.currentTarget;
+
+    if (dragState.handleElement) {
+
+        dragState.handleElement.classList.add(
+            "dragging"
+        );
+
+    }
+
+    event.preventDefault();
+
+},
+
+    move(event) {
+     if (!dragState.active) {
+        return;
+    }
+     dragState.pointerX = event.clientX;
+     dragState.pointerY = event.clientY;   
+
+     const dx =
+           dragState.pointerX - dragState.startPointerX;
+
+         const dy =
+           dragState.pointerY - dragState.startPointerY;
+
+         const distance =
+           Math.hypot(dx, dy);
+
+         if (
+            !dragState.moved &&
+            distance < DRAG_THRESHOLD
+ ){
+    return;
+}   
+
+    
+
+    
+
+    const target = DragManager.getInsertPosition(event);
+
+    if (!target) {
+
+    DragManager.renderIndicator(null);
+
+    autoScrollDuringDrag(event);
+
+    return;
+
+}
+
+    dragState.targetIndex = target.index;
+
+    dragState.insertBefore = target.insertBefore;
+
+    dragState.moved = true;
+
+    DragManager.renderIndicator(target);
+
+    autoScrollDuringDrag(event);
+
+    },
+    
+    end(event) {
+
+    if (!dragState.active) {
+        return;
+    }
+
+    const fromIndex = dragState.sourceIndex;
+    let toIndex = dragState.targetIndex;
+
+    if (
+        fromIndex != null &&
+        toIndex != null &&
+        dragState.moved
+    ) {
+
+        if (!dragState.insertBefore) {
+            toIndex++;
+        }
+
+        if (fromIndex < toIndex) {
+            toIndex--;
+        }
+
+        DragManager.renderIndicator(null);
+
+        DragManager.cancel();
+
+        movePage(fromIndex, toIndex);
+
+        return;
+    }
+
+    DragManager.renderIndicator(null);
+
+    DragManager.cancel();
+
+ },
+
+    cancel() {
+
+     if(dragState.handleElement){
+
+    dragState.handleElement.classList.remove(
+        "dragging"
+    );
+
+}
+
+    clearRowIndicator();
+    resetDragState();
+    
+
+},
+
+    getInsertPosition(event) {
+
+        return getInsertTarget(event);
+
+    },
+
+    renderIndicator(target) {
+
+    const indicator = createRowIndicator();
+
+    if (!target) {
+
+        indicator.style.display = "none";
+
+        return;
+
+    }
+
+    const rect = target.element.getBoundingClientRect();
+
+    indicator.style.display = "block";
+
+    indicator.style.left = rect.left + "px";
+
+    indicator.style.width = rect.width + "px";
+
+    if (target.insertBefore) {
+
+        indicator.style.top = rect.top + "px";
+
+    } else {
+
+        indicator.style.top = rect.bottom + "px";
+
+    }
+
+}
+
+};
+
+function resetTagDragState(){
+
+    tagDragState.active = false;
+
+    tagDragState.sourcePage = null;
+    tagDragState.sourceType = null;
+    tagDragState.sourceIndex = null;
+
+    tagDragState.targetPage = null;
+    tagDragState.targetType = null;
+    tagDragState.targetIndex = null;
+
+    tagDragState.pointerX = 0;
+    tagDragState.pointerY = 0;
+
+    tagDragState.startPointerX = 0;
+    tagDragState.startPointerY = 0;
+
+    tagDragState.moved = false;
+
+    tagDragState.handleElement = null;
+
+}
+
+function resetDragState(){
+
+    dragState.active = false;
+
+    dragState.sourceIndex = null;
+
+    dragState.targetIndex = null;
+
+    dragState.insertBefore = true;
+
+    dragState.pointerX = 0;
+    dragState.pointerY = 0;
+
+    dragState.startPointerX = 0;
+    dragState.startPointerY = 0;
+
+    dragState.moved = false;
+
+    dragState.handleElement = null;
+
+}
+
+/* =====================================================
+   Tag Drag Manager (Ver15.3 Phase2)
+===================================================== */
+
+const TagDragManager = {
+
+    start(event, page, type, index){
+
+        if(event.button !== 0){
+            return;
+        }
+
+        tagDragState.active = true;
+
+        tagDragState.sourcePage = page;
+        tagDragState.sourceType = type;
+        tagDragState.sourceIndex = index;
+
+        tagDragState.pointerX = event.clientX;
+        tagDragState.pointerY = event.clientY;
+
+        tagDragState.startPointerX = event.clientX;
+        tagDragState.startPointerY = event.clientY;
+
+        tagDragState.moved = false;
+
+        tagDragState.handleElement = event.currentTarget;
+
+        if(tagDragState.handleElement){
+
+            tagDragState.handleElement.classList.add(
+                "dragging"
+            );
+
+        }
+        event.preventDefault();
+    },
+
+    move(event){
+    
+    if(!tagDragState.active){
+        return;
+    }
+
+    tagDragState.pointerX = event.clientX;
+    tagDragState.pointerY = event.clientY;
+
+    const dx =
+        tagDragState.pointerX -
+        tagDragState.startPointerX;
+
+    const dy =
+        tagDragState.pointerY -
+        tagDragState.startPointerY;
+
+    const distance =
+        Math.hypot(dx, dy);
+
+    if(
+        !tagDragState.moved &&
+        distance < DRAG_THRESHOLD
+    ){
+        return;
+    }
+
+    tagDragState.moved = true;
+
+    const target =
+        getTagInsertTarget(event);
+
+    if(target){
+
+       tagDragState.targetPage = target.page;
+
+       tagDragState.targetType = target.type;
+
+       tagDragState.targetIndex =
+         target.insertBefore
+            ? target.index
+            : target.index + 1;
+
+}
+
+    renderTagIndicator(target);
+
+    renderTagHighlight(target);
+
+    autoScrollDuringDrag(event);
+
+},
+
+    end(){
+
+    if(!tagDragState.active){
+        return;
+    }
+
+    clearTagIndicator();
+
+    clearTagHighlight();
+
+    if(
+        tagDragState.moved &&
+        tagDragState.targetPage != null &&
+        tagDragState.targetType != null
+    ){
+
+        moveTag(
+            tagDragState.sourcePage,
+            tagDragState.sourceType,
+            tagDragState.sourceIndex,
+            tagDragState.targetPage,
+            tagDragState.targetType,
+            tagDragState.targetIndex
+        );
+
+    }
+
+    if(tagDragState.handleElement){
+
+        tagDragState.handleElement.classList.remove(
+            "dragging"
+        );
+
+    }
+
+    resetTagDragState();
+
+}
+
+};
+
+/* =====================================================
+   Tag Position Utilities
+===================================================== */
+
+function getTagElements(){
+
+    return Array.from(
+        document.querySelectorAll(".tag")
+    );
+
+}
+
+function getTagRect(tag){
+
+    if(!tag){
+        return null;
+    }
+
+    return tag.getBoundingClientRect();
+
+}
+
+function getTagInsertSide(event, rect){
+
+    if(!rect){
+        return true;
+    }
+
+    const middle =
+        rect.left + rect.width / 2;
+
+    return event.clientX < middle;
+
+}
+
+function getTagInsertTarget(event){
+
+    // ----------------------------------
+    // ① まずタグそのものを判定
+    // ----------------------------------
+
+    const tags = getTagElements();
+
+    for(const tag of tags){
+
+        const rect = getTagRect(tag);
+
+        if(!rect){
+            continue;
+        }
+
+        if(
+            event.clientX >= rect.left &&
+            event.clientX <= rect.right &&
+            event.clientY >= rect.top &&
+            event.clientY <= rect.bottom
+        ){
+
+            return {
+
+                element: tag,
+
+                page: Number(tag.dataset.page),
+
+                type: tag.dataset.type,
+
+                index: Number(tag.dataset.index),
+
+                insertBefore:
+                    getTagInsertSide(event, rect)
+
+            };
+
+        }
+
+    }
+
+    // ----------------------------------
+    // ② タグが無ければ tagList を判定
+    //    （空欄・末尾追加対応）
+    // ----------------------------------
+
+    const lists =
+        document.querySelectorAll(".tagList");
+
+    for(const list of lists){
+
+        const rect =
+            list.getBoundingClientRect();
+
+        if(
+            event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom
+        ){
+            continue;
+        }
+
+        return {
+
+           element: list,
+
+           page: Number(list.dataset.page),
+
+           type: list.dataset.type,
+
+           index: list.querySelectorAll(".tag").length,
+
+           insertBefore: true,
+
+           isList: true
+
+};
+
+    }
+
+    return null;
+
+}
+
+/* =====================================================
+   Row Indicator Element
+===================================================== */
+
+let rowIndicatorElement = null;
+
+function createRowIndicator(){
+
+    if(rowIndicatorElement){
+        return rowIndicatorElement;
+    }
+
+    rowIndicatorElement = document.createElement("div");
+
+    rowIndicatorElement.id = "rowDragIndicator";
+
+    Object.assign(rowIndicatorElement.style, {
+
+        position: "fixed",
+
+        left: "0px",
+
+        top: "0px",
+
+        width: "0px",
+
+        height: "3px",
+
+        background: "#2f6fed",
+
+        pointerEvents: "none",
+
+        zIndex: "999999",
+
+        display: "none"
+
+    });
+
+    document.body.appendChild(rowIndicatorElement);
+
+    return rowIndicatorElement;
+
+}
+
+function clearRowIndicator(){
+
+    if(!rowIndicatorElement){
+        return;
+    }
+
+    rowIndicatorElement.style.display = "none";
+
+}
+
+/* =====================================================
+   Tag Indicator Element
+===================================================== */
+
+let tagIndicatorElement = null;
+
+function createTagIndicator(){
+
+    if(tagIndicatorElement){
+        return tagIndicatorElement;
+    }
+
+    tagIndicatorElement = document.createElement("div");
+
+    tagIndicatorElement.id = "tagDragIndicator";
+
+    Object.assign(tagIndicatorElement.style, {
+
+        position: "fixed",
+
+        left: "0px",
+
+        top: "0px",
+
+        width: "3px",
+
+        height: "0px",
+
+        background: "#2f6fed",
+
+        pointerEvents: "none",
+
+        zIndex: "999999",
+
+        display: "none"
+
+    });
+
+    document.body.appendChild(tagIndicatorElement);
+
+    return tagIndicatorElement;
+
+}
+
+function removeTagIndicator(){
+
+    if(!tagIndicatorElement){
+        return;
+    }
+
+    tagIndicatorElement.remove();
+
+    tagIndicatorElement = null;
+
+}
+
+/* =====================================================
+   Tag Indicator
+===================================================== */
+
+function clearTagIndicator(){
+
+    if(!tagIndicatorElement){
+        return;
+    }
+
+    tagIndicatorElement.style.display = "none";
+
+}
+
+function renderTagIndicator(target){
+
+    // 背景ハイライトのみ使用するため何もしない
+
+}
+
+/* =====================================================
+   Tag Highlight
+===================================================== */
+
+function clearTagHighlight(){
+
+    document
+        .querySelectorAll(".tagList.drag-target")
+        .forEach(el=>{
+
+            el.classList.remove("drag-target");
+
+        });
+
+}
+
+function renderTagHighlight(target){
+
+    clearTagHighlight();
+
+    if(!target){
+        return;
+    }
+
+    const element =
+        target.isList
+            ? target.element
+            : target.element.closest(".tagList");
+
+    if(!element){
+        return;
+    }
+
+    element.classList.add("drag-target");
+
+}
+
+/* =====================================================
+   Drag Position Utilities (Ver15 Phase1)
+===================================================== */
+
+function getGridRows() {
+
+    return Array.from(
+        document.querySelectorAll(".gridRow")
+    );
+
+}
+
+function getRowRect(row) {
+
+    if (!row) {
+        return null;
+    }
+
+    return row.getBoundingClientRect();
+
+}
+
+function getPointerPosition(event) {
+
+    return {
+        x: event.clientX,
+        y: event.clientY
+    };
+
+}
+
+function getInsertSide(event, rect) {
+
+    if (!rect) {
+        return true;
+    }
+
+    const middle = rect.top + rect.height / 2;
+
+    return event.clientY < middle;
+
+}
+
+function getInsertTarget(event) {
+
+    const rows = getGridRows();
+
+    for (let i = 0; i < rows.length; i++) {
+
+        const rect = getRowRect(rows[i]);
+
+        if (!rect) {
+            continue;
+        }
+
+        if (
+            event.clientY >= rect.top &&
+            event.clientY <= rect.bottom
+        ) {
+
+            return {
+                element: rows[i],
+                index: i,
+                insertBefore: getInsertSide(event, rect)
+            };
+
+        }
+
+    }
+
+    return null;
+
+}
+
+/* =====================================================
+   UI Cache
+===================================================== */
+
+const ui = {};
+
+/* =====================================================
+   Cache Elements
+===================================================== */
+
+
+
+function cacheElements() {
+
+    ui.caseTitle =
+        document.getElementById("caseTitle");
+
+    ui.statusBtn =
+        document.getElementById("statusBtn");
+
+    ui.targetPages =
+        document.getElementById("targetPages");
+
+    ui.progressText =
+        document.getElementById("progressText");
+
+    ui.progressFill =
+        document.getElementById("progressFill");
+
+    ui.tableArea =
+        document.getElementById("tableArea");
+
+    ui.headerMemo =
+        document.getElementById("headerMemo");
+
+    ui.search =
+        document.getElementById("search");
+    
+      ui.gridHeader =
+        document.getElementById("gridHeader");  
+
+}
+
+/* =====================================================
+   Initialize
+===================================================== */
+
+function init(){
+
+    // DOMキャッシュ
+    cacheElements();
+
+    // イベント登録
+    bindEvents();
+    document.addEventListener("mousemove", DragManager.move);
+    document.addEventListener("mouseup", DragManager.end);
+    document.addEventListener("mousemove", TagDragManager.move);
+    document.addEventListener("mouseup", TagDragManager.end);
+
+    // CASE FILE復元
+    restoreHeader();
+
+    // 初期表示
+    render();
+
+    createTagIndicator();
+    createRowIndicator();
+
+}
+
+/* =====================================================
+   Persistence
+===================================================== */
+
+function save(){
+
+    // CASE FILE
+    db.caseTitle = ui.caseTitle.value;
+
+    // 案件メモ
+    if (ui.headerMemo) {
+    db.headerMemo = ui.headerMemo.value;
+    }
+
+    // 一覧表示用
+    current.title =
+        db.caseTitle || "新しい調査";
+
+    current.status =
+        db.status || "調査中";
+
+    // 更新日時
+    current.updated =
+        new Date().toLocaleString("ja-JP");
+
+    // LocalStorage 保存
+    localStorage.setItem(
+        "arg_cases",
+        JSON.stringify(cases)
+    );
+
+}
+
+/* =====================================================
+   Restore
+===================================================== */
+
+function restoreHeader() {
+
+    ui.caseTitle.value =
+        db.caseTitle || "新しい調査";
+
+    if (ui.headerMemo) {
+        ui.headerMemo.value =
+            db.headerMemo || "";
+    }
+
+    applyStatusUI();
+}
+
+/* =====================================================
+   Apply Status UI
+===================================================== */
+
+function applyStatusUI() {
+
+    db.status = db.status || "調査中";
+
+    ui.statusBtn.textContent = db.status;
+
+    ui.statusBtn.className =
+        db.status === "調査完了"
+            ? "status-complete"
+            : "status-investigating";
+
+}
+
+function toggleStatus(){
+ db.status=db.status==='調査中'?'調査完了':'調査中';
+ 
+ applyStatusUI();
+ save();
+ updateProgress();
+}
+
+/* =====================================================
+   Event Binding
+===================================================== */
+
+function bindEvents(){
+
+    // -----------------------------
+    // 案件名
+    // -----------------------------
+    ui.caseTitle.oninput = save;
+
+    // -----------------------------
+    // 調査状態
+    // -----------------------------
+    ui.statusBtn.onclick = toggleStatus;
+
+    // -----------------------------
+    // TARGET
+    // -----------------------------
+    const targetInput = ui.targetPages;
+
+    if(targetInput){
+
+        targetInput.addEventListener("input",()=>{
+
+            db.targetPages =
+                parseInt(targetInput.value) || 0;
+
+            save();
+
+            updateProgress();
+
+        });
+      }
+    // -----------------------------
+    // 案件メモ
+    // -----------------------------
+    if (ui.headerMemo) {
+        ui.headerMemo.addEventListener("input", () => {
+        save();
+        });
+     }
+
+    }
+
+/* =====================================================
+   Show Toast
+===================================================== */
+
+function showToast(message) {
+
+    const toast = document.createElement("div");
+
+    toast.className = "copyToast";
+
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+
+        toast.remove();
+
+    }, 1500);
+
+}
+
+function copyText(text){
+    navigator.clipboard.writeText(text);
+    showToast("コピーしました");
+}
+
+function addPage(){
+
+    db.pages.unshift({
+        no: db.pages.length + 1,
+        title: '',
+        keywords: [],
+        memos: []
+    });
+
+    save();
+
+    render();
+
+}
+
+function deletePage(i){
+
+    db.pages.splice(i,1);
+
+    save();
+
+    render();
+
+}
+
+function addTag(i, type, input) {
+
+    if (!input) {
+        return;
+    }
+
+    const value = input.value.trim();
+
+    if (!value) {
+        input.focus();
+        return;
+    }
+
+    // 追加
+    db.pages[i][type].push(value);
+
+    // 保存
+    save();
+
+    // 再描画
+    render();
+
+    // 描画後に元の入力欄へ戻す
+    requestAnimationFrame(() => {
+
+        const targets = document.querySelectorAll(
+            `input[data-tagtype="${type}"]`
+        );
+
+        const target = targets[i];
+
+        if (!target) {
+            return;
+        }
+
+        target.value = "";
+
+        target.focus();
+
+    });
+
+}
+
+
+function startInlineEdit(el,page,type,index){
+ const oldValue = db.pages[page][type][index];
+ el.contentEditable = true;
+ el.focus();
+
+ const saveEdit = ()=>{
+   el.contentEditable = false;
+   const value = el.innerText.trim();
+   if(value){
+      db.pages[page][type][index] = value;
+      save();
+      render();
+   }else{
+      el.innerText = oldValue;
+   }
+ };
+
+ el.onblur = saveEdit;
+ el.onkeydown = (e)=>{
+   if(e.key==='Enter'){
+      e.preventDefault();
+      saveEdit();
+   }
+   if(e.key==='Escape'){
+      el.contentEditable = false;
+      el.innerText = oldValue;
+   }
+ };
+}
+
+function removeTag(i,type,n){
+
+    db.pages[i][type].splice(n,1);
+
+    save();
+
+    render();
+
+}
+
+/* =====================================================
+   Move Page
+===================================================== */
+
+function movePage(fromIndex, toIndex){
+
+    if(
+        fromIndex == null ||
+        toIndex == null
+    ){
+        return;
+    }
+
+    if(fromIndex === toIndex){
+        return;
+    }
+
+    if(
+        fromIndex < 0 ||
+        fromIndex >= db.pages.length
+    ){
+        return;
+    }
+
+    if(
+        toIndex < 0 ||
+        toIndex > db.pages.length
+    ){
+        return;
+    }
+
+    const moved =
+        db.pages.splice(fromIndex, 1)[0];
+
+    db.pages.splice(toIndex, 0, moved);
+
+    save();
+
+    render();
+
+}
+
+/* =====================================================
+   Move Tag
+===================================================== */
+
+function moveTag(
+    fromPage,
+    fromType,
+    fromIndex,
+    toPage,
+    toType,
+    toIndex = null
+){
+
+    if(
+        fromPage == null ||
+        fromType == null ||
+        fromIndex == null ||
+        toPage == null ||
+        toType == null
+    ){
+        return;
+    }
+
+    const sourceList =
+        db.pages[fromPage][fromType];
+
+    const targetList =
+        db.pages[toPage][toType];
+
+    if(
+        !sourceList ||
+        !targetList
+    ){
+        return;
+    }
+
+    const moved =
+        sourceList.splice(fromIndex,1)[0];
+    
+    if (
+        sourceList === targetList &&
+        toIndex != null &&
+        fromIndex < toIndex
+  ) {
+      toIndex--;
+}
+
+    if(moved == null){
+        return;
+    }
+
+    if(
+        toIndex == null ||
+        toIndex > targetList.length
+    ){
+        targetList.push(moved);
+    }else{
+        targetList.splice(
+            toIndex,
+            0,
+            moved
+        );
+    }
+
+    save();
+
+    render();
+
+}
+
+/* =====================================================
+   Auto Scroll During Drag
+===================================================== */
+
+function autoScrollDuringDrag(event){
+
+    if (
+     !dragState.active &&
+     !tagDragState.active
+     ){
+     return;
+}
+
+    if (
+        event.clientY < AUTO_SCROLL_MARGIN
+    ) {
+
+        window.scrollBy(
+            0,
+            -AUTO_SCROLL_SPEED
+        );
+
+        return;
+    }
+
+    if (
+        event.clientY >
+        window.innerHeight - AUTO_SCROLL_MARGIN
+    ) {
+
+        window.scrollBy(
+            0,
+            AUTO_SCROLL_SPEED
+        );
+
+    }
+
+}
+
+function renderTags(pageIndex, type, items){
+
+    let html = "";
+
+    (items || []).forEach((text, index) => {
+
+        const esc = text.replace(/'/g, "\\'");
+
+        html += `
+     <div
+      class="tag"
+      data-page="${pageIndex}"
+      data-type="${type}"
+      data-index="${index}"
+      onmousedown="TagDragManager.start(event,${pageIndex},'${type}',${index})">
+
+    <span
+        class="tagText"
+        ondblclick="startInlineEdit(this,${pageIndex},'${type}',${index})">
+        ${text}
+    </span>
+
+    <button
+     class="copyTagButton"
+     title="コピー"
+     aria-label="コピー"
+     onclick="copyText('${esc}',this)">
+    </button>
+
+    <button
+    class="removeTagButton"
+      title="削除"
+      aria-label="削除"
+      onclick="removeTag(${pageIndex},'${type}',${index})">
+    </button>
+
+</div>`;
+    });
+
+    return html;
+
+}
+
+function renderGridTagCell(pageIndex, type, tags){
+
+    return `
+<div class="gridCell tagCell">
+
+    <div class="tagArea">
+
+        ${renderGridTagList(
+            pageIndex,
+            type,
+            tags
+        )}
+
+        ${renderGridTagInput(
+            pageIndex,
+            type
+        )}
+
+    </div>
+
+</div>`;
+}
+
+function renderGridTagList(pageIndex, type, tags){
+
+    const html = renderTags(pageIndex, type, tags);
+
+    return `
+
+<div
+    class="dropzone tagList"
+    data-page="${pageIndex}"
+    data-type="${type}">
+
+    ${html}
+
+</div>`;
+
+}
+
+function renderGridTagInput(pageIndex, type){
+
+    return `
+<div class="tagInputArea">
+
+    <div class="inputGroup">
+
+        <input
+            class="modernInput tagInput"
+            data-tagtype="${type}"
+            placeholder="入力..."
+            onkeydown="if(event.key==='Enter'){addTag(${pageIndex},'${type}',this)}">
+
+    </div>
+
+    <button
+      class="addTagButton"
+      type="button"
+      title="追加"
+      aria-label="追加"
+      onclick="addTag(${pageIndex},'${type}',this.parentElement.querySelector('.modernInput'))">
+    </button>
+
+</div>`;
+}
+
+function normalizeTitleText(text){
+
+    return text
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+
+}
+
+function startTitleEdit(cell, pageIndex){
+
+    if(cell.querySelector("textarea")){
+        return;
+    }
+
+    const originalText = db.pages[pageIndex].title || "";
+
+    const textarea = document.createElement("textarea");
+
+    textarea.value = originalText;
+
+    textarea.style.width = "100%";
+    textarea.style.minHeight = "60px";
+    textarea.style.boxSizing = "border-box";
+    textarea.style.resize = "none";
+    textarea.style.font = "inherit";
+    textarea.style.border = "none";
+    textarea.style.outline = "none";
+    textarea.style.background = "transparent";
+    textarea.style.padding = "0";
+    textarea.style.margin = "0";
+
+    textarea.style.lineHeight = "1.4";
+    textarea.style.fontSize = "14px";
+    textarea.style.fontFamily = "inherit";
+    textarea.style.overflow = "hidden";
+
+    cell.innerHTML = "";
+    cell.appendChild(textarea);
+
+    textarea.focus();
+    autoResizeTitleEditor(textarea);
+
+    textarea.setSelectionRange(
+    textarea.value.length,
+    textarea.value.length
+    );
+
+    let finished = false;
+
+    function saveEdit(){
+
+        if(finished){
+            return;
+        }
+
+        finished = true;
+
+        db.pages[pageIndex].title =
+            normalizeTitleText(textarea.value);
+
+        save();
+        render();
+
+    }
+
+    function cancelEdit(){
+
+        if(finished){
+            return;
+        }
+
+        finished = true;
+
+        render();
+
+    }
+
+    textarea.addEventListener("blur", saveEdit);
+
+    textarea.addEventListener("input",()=>{
+
+    autoResizeTitleEditor(textarea);
+
+    });
+    textarea.addEventListener("keydown",(event)=>{
+
+        // Esc：キャンセル
+        if(event.key === "Escape"){
+
+            event.preventDefault();
+
+            cancelEdit();
+
+            return;
+
+        }
+
+        // Ctrl + Enter：保存
+        if(event.key === "Enter" && event.ctrlKey){
+
+            event.preventDefault();
+
+            saveEdit();
+
+        }
+
+    });
+
+}
+
+function autoResizeTitleEditor(textarea){
+
+    textarea.style.height = "auto";
+
+    textarea.style.height = textarea.scrollHeight + "px";
+
+}
+
+function handleTitleKeyDown(event){
+
+    // 何もしない
+    return;
+
+}
+
+
+/* =====================================================
+   Build Table HTML
+===================================================== */
+
+function buildGridDeleteCell(pageIndex){
+
+    return `
+<div class="gridCell">
+
+    <button
+        class="deletePageButton"
+        title="ページ削除"
+        aria-label="ページ削除"
+        onclick="deletePage(${pageIndex})">
+    </button>
+
+</div>`;
+}
+
+function buildGridHandleCell(pageIndex){
+
+    return `
+<div
+    class="gridCell rowhandle"
+    title="ドラッグして並び替え"
+    onmousedown="DragManager.start(event,${pageIndex})">
+
+</div>`;
+
+}
+
+function buildGridNoCell(pageIndex, page){
+
+    return `
+<div
+    class="gridCell"
+    contenteditable="true"
+    onblur="db.pages[${pageIndex}].no=this.innerText.trim();save();">
+
+    ${page.no}
+
+</div>`;
+}
+
+function buildGridTitleCell(pageIndex, page){
+
+    const title = page.title || "";
+
+    return `
+<div
+    class="gridCell titleCell ${!title.trim() ? "empty-title" : ""}"
+    onclick="startTitleEdit(this,${pageIndex})">${title}</div>`;
+
+}
+
+function buildGridRow(pageIndex, page){
+
+    return `
+<div
+    class="gridRow"
+    data-page-index="${pageIndex}">
+
+    ${buildGridHandleCell(pageIndex)}
+
+    ${buildGridNoCell(pageIndex, page)}
+
+    ${buildGridTitleCell(pageIndex, page)}
+
+    ${renderGridTagCell(
+        pageIndex,
+        "keywords",
+        page.keywords
+    )}
+
+    ${renderGridTagCell(
+        pageIndex,
+        "memos",
+        page.memos
+    )}
+
+    ${buildGridDeleteCell(pageIndex)}
+
+</div>`;
+
+}
+
+function buildGridHtml(){
+
+    let html = "";
+
+    db.pages.forEach((page, index)=>{
+
+        html += buildGridRow(index, page);
+
+    });
+
+    return html;
+
+}
+
+/* =====================================================
+   Rendering
+===================================================== */
+
+function render(){
+
+    renderHeader();
+
+    renderTable(
+        buildGridHtml()
+    );
+
+    updateProgress();
+
+}
+
+/* =====================================================
+   Render Table
+===================================================== */
+
+function renderHeader(){
+
+    ui.gridHeader.innerHTML = GRID_COLUMNS
+        .map(title => `
+            <div class="gridHeaderCell">
+                ${title}
+            </div>
+        `)
+        .join("");
+
+}
+
+function renderTable(html){
+
+    ui.tableArea.innerHTML = html;
+
+}
+
+function exportCase(){
+ const blob=new Blob([JSON.stringify(current,null,2)],{type:'application/json'});
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);
+ a.download=(current.title||'case')+'.json';
+ a.click();
+}
+
+function importCase(e){
+
+    const f = e.target.files[0];
+
+    if (!f) {
+        return;
+    }
+
+    const r = new FileReader();
+
+    r.onload = () => {
+
+        const imported = JSON.parse(r.result);
+
+        current.data = imported.data || imported;
+
+        db = current.data;
+
+        // CASE FILE を復元
+        restoreHeader();
+
+        // 再描画
+        render();
+
+        // 保存
+        save();
+
+    };
+
+    r.readAsText(f);
+
+}
+
+
+db.targetPages = db.targetPages || 0;
+
+function updateProgress(){
+ const target = parseInt(db.targetPages||0);
+ const current = db.pages.length;
+
+ const input = ui.targetPages;
+ const text = ui.progressText;
+ const fill = ui.progressFill;
+
+ if(input && document.activeElement !== input){
+   input.value = target || '';
+ }
+
+ if(target <= 0){
+   text.textContent = '未設定';
+   fill.style.width = '0%';
+   fill.style.background = '#1e3a5f';
+   return;
+ }
+
+ const percent = Math.min(100, Math.round((current/target)*100));
+
+ text.textContent = `${current} / ${target} (${percent}%)`;
+
+ fill.style.width = percent + '%';
+ fill.style.background = percent >= 100 ? '#22c55e' : '#1e3a5f';
+}
+
+
+
+/* =====================================================
+   Plain Text Paste
+===================================================== */
+
+function plainTextPaste(e) {
+
+    const active = document.activeElement;
+
+    if (!active) {
+        return;
+    }
+
+    // contenteditable
+    if (active.isContentEditable) {
+
+        e.preventDefault();
+
+        const text =
+            (e.clipboardData || window.clipboardData)
+                .getData("text");
+
+        document.execCommand("insertText", false, text);
+
+        return;
+    }
+
+    // textarea / input
+    if (
+        active.tagName === "TEXTAREA" ||
+        active.tagName === "INPUT"
+    ) {
+
+        e.preventDefault();
+
+        const text =
+            (e.clipboardData || window.clipboardData)
+                .getData("text");
+
+        const start = active.selectionStart;
+        const end = active.selectionEnd;
+
+        const value = active.value;
+
+        active.value =
+            value.substring(0, start) +
+            text +
+            value.substring(end);
+
+        active.selectionStart =
+            active.selectionEnd =
+                start + text.length;
+
+        active.dispatchEvent(
+            new Event("input", {
+                bubbles: true
+            })
+        );
+    }
+
+}
+
+document.addEventListener("paste", plainTextPaste);
+
+init();
+
+</script>
+
+<script>
+ if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js");
+  });
+}
+</script>
+
+</body>
+</html>
